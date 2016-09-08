@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1",
+	"FriendlyName": "Pushwoosh",
+	"Description": "",
+	"Category": "Other",
+	"CreatedBy": "Pushwoosh Inc",
+	"CreatedByURL": "https://www.pushwoosh.com/",
+	"DocsURL": "http://docs.pushwoosh.com/v1.0/docs/unreal-engine-blueprint",
+	"MarketplaceURL": "",
+	"SupportURL": "https://www.pushwoosh.com/contact-us/",
+	"EnabledByDefault": false,
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "Pushwoosh",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

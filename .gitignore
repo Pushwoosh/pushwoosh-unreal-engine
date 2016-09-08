@@ -1,0 +1,8 @@
+Binaries
+Build
+Intermediate
+Saved
+*.ipa
+Plugins/Pushwoosh/lib/Android/JavaLibs/pushwoosh-ue-plugin/.settings
+Plugins/Pushwoosh/lib/Android/JavaLibs/pushwoosh-ue-plugin/bin
+xcuserdata
