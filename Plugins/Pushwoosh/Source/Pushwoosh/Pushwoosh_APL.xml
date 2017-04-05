@@ -21,7 +21,6 @@
 			<meta-data android:name="PW_NOTIFICATION_RECEIVER" android:value="com.pushwoosh.ueplugin.PushOpenReceiver"/>
 
 			<!-- Pushwoosh SDK additions -->
-			<activity android:name="com.pushwoosh.MessageActivity" />
 			<activity android:name="com.pushwoosh.PushHandlerActivity" />
 			<activity
 				android:name="com.pushwoosh.inapp.WebActivity"
