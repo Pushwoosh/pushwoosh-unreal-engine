@@ -6,9 +6,10 @@
 
 #if PLATFORM_IOS
 
-#import <Pushwoosh/PushNotificationManager.h>
 #import "PWDelegateProxy.h"
 
+#import <Pushwoosh/PushNotificationManager.h>
+#import <UserNotifications/UserNotifications.h>
 
 NSString *g_startPushData = nil;
 NSObject *g_lock = [NSObject new];
@@ -74,6 +75,8 @@ void PushwooshiOS::Initialize()
 	 
 	[PushNotificationManager initializeWithAppCode:applicationId.GetNSString() appName:nil];
 	[PushNotificationManager pushManager].delegate = (NSObject<PushNotificationDelegate> *)[UIApplication sharedApplication];
+	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
+
 	[[PushNotificationManager pushManager] sendAppOpen];
 }
 
