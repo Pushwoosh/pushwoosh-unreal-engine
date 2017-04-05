@@ -27,7 +27,7 @@ void FPushwooshModule::StartupModule()
 	{
 		settingsModule->RegisterSettings("Project", "Plugins", "Pushwoosh",
 										 LOCTEXT("RuntimeSettingsName", "Pushwoosh"),
-										 LOCTEXT("RuntimeSettingsDescription", "Configure the Pushwoosh plugin"),
+										 LOCTEXT("RuntimeSettingsDescription", "Configure the Pushwoosh plugin (these settings are saved in DefaultPushwoosh.ini)"),
 										 GetMutableDefault<UPushwooshSettings>()
 										 );
 	}
