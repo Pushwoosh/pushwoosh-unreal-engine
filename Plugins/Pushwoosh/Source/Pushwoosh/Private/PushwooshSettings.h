@@ -2,6 +2,11 @@
 
 #pragma once
 
+#include "Engine.h"
+
+#include "UObject/ObjectMacros.h"
+#include "UObject/Object.h"
+
 #include "PushwooshSettings.generated.h"
 
 UCLASS(Config = Pushwoosh)

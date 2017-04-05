@@ -1,10 +1,10 @@
 // Copyright 2016 Pushwoosh Inc. All Rights Reserved.
 
+#if PLATFORM_IOS
+
 #include "PushwooshPrivatePCH.h"
 
 #import "PWDelegateProxy.h"
-
-#if PLATFORM_IOS
 
 @interface PWDelegateProxy()
 
