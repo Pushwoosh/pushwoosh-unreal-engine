@@ -18,5 +18,9 @@
 			"Name": "Pushwoosh",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Android",
+		"IOS"
 	]
 }
