@@ -9,9 +9,11 @@ import org.json.JSONObject;
 import com.pushwoosh.BasePushMessageReceiver;
 import com.pushwoosh.BaseRegistrationReceiver;
 import com.pushwoosh.PushManager;
+import com.pushwoosh.inapp.InAppFacade;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -21,6 +23,7 @@ public class PushwooshPlugin
 	public static final String TAG = "PushwooshUEPlugin";
 	
 	private final Context mContext;
+	private final Activity mGameActivity;
 	private boolean mGameActivityAlive = false;
 	private PushManager mPushManager;
 	private AtomicBoolean mRegistering = new AtomicBoolean(false);
@@ -37,10 +40,11 @@ public class PushwooshPlugin
 		return mInstance;
 	}
 	
-	public PushwooshPlugin(Context context)
+	public PushwooshPlugin(Activity activity)
 	{
 		mInstance = this;
-		mContext = context.getApplicationContext();
+		mGameActivity = activity;
+		mContext = activity.getApplicationContext();
 	}
 	
 	public boolean isGameActivityAlive()
@@ -119,6 +123,34 @@ public class PushwooshPlugin
 			PushManager.sendTags(mContext, tags, null);
 		}
 		catch(JSONException e)
+		{
+			PWLog.exception(e);
+		}
+	}
+	
+	public void setUserId(String userId)
+	{
+		PWLog.debug(TAG, "setUserId(\"" + userId +  "\") method called ");
+		
+		PushManager.getInstance(mContext).setUserId(mContext, userId);
+	}
+	
+	public void postEvent(String event, String attributes)
+	{
+		PWLog.debug(TAG, "postEvent(\"" + event +  "\", " + attributes + ") method called ");
+		
+		attributes = attributes.trim();
+		if (attributes.isEmpty()) 
+		{
+			attributes = "{}";
+		}
+		
+		try
+		{
+			Map<String, Object> attributesMap = JsonUtils.jsonToMap(new JSONObject(attributes));
+			InAppFacade.postEvent(mGameActivity, event, attributesMap);
+		}
+		catch (JSONException e)
 		{
 			PWLog.exception(e);
 		}

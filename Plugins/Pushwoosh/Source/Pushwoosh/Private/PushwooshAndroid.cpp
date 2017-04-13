@@ -117,6 +117,25 @@ void PushwooshAndroid::SetTags(FString json)
 	}
 }
 
+void PushwooshAndroid::SetUserId(FString userId)
+{
+	if (JNIEnv* env = FAndroidApplication::GetJavaEnv())
+	{
+		jstring jStrUserId= env->NewStringUTF(TCHAR_TO_UTF8(*userId));
+		env->CallVoidMethod(pluginObject, androidThunkJava_SetUserId, jStrUserId);
+	}
+}
+
+void PushwooshAndroid::PostEvent(FString event, FString attributes)
+{
+	if (JNIEnv* env = FAndroidApplication::GetJavaEnv())
+	{
+		jstring jStrEvent = env->NewStringUTF(TCHAR_TO_UTF8(*event));
+		jstring jStrAttributes = env->NewStringUTF(TCHAR_TO_UTF8(*attributes));
+		env->CallVoidMethod(pluginObject, androidThunkJava_PostEvent, jStrEvent, jStrAttributes);
+	}
+}
+
 void PushwooshAndroid::InitializeJavaInterface()
 {
 	UE_LOG(LogPushwoosh, Log, TEXT("Initializing Java interface..."));
@@ -131,6 +150,8 @@ void PushwooshAndroid::InitializeJavaInterface()
 		androidThunkJava_RegisterForPushNotifications = FJavaWrapper::FindMethod(env, pluginClass, "registerForPushNotifications", "()V", false);
 		androidThunkJava_UnregisterForPushNotifications = FJavaWrapper::FindMethod(env, pluginClass, "unregisterForPushNotifications", "()V", false);
 		androidThunkJava_SetTags = FJavaWrapper::FindMethod(env, pluginClass, "setTags", "(Ljava/lang/String;)V", false);
+		androidThunkJava_SetUserId = FJavaWrapper::FindMethod(env, pluginClass, "setUserId", "(Ljava/lang/String;)V", false);
+		androidThunkJava_PostEvent = FJavaWrapper::FindMethod(env, pluginClass, "postEvent", "(Ljava/lang/String;Ljava/lang/String;)V", false);
 
 		jobject localPluginObject = env->CallStaticObjectMethod(pluginClass, androidThunkJava_getInstance);
 		CheckJavaObject(env, localPluginObject, "PushwooshPlugin instance");

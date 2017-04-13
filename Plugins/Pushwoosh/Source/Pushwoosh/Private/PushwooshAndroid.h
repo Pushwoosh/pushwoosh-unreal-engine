@@ -26,6 +26,9 @@ public:
 	
 	virtual void SetTags(FString json) override;
 
+	virtual void SetUserId(FString userId) override;
+
+	virtual void PostEvent(FString event, FString attributes) override;
 private:
 	FString applicationId;
 	FString gcmProjectNumber;
@@ -36,6 +39,8 @@ private:
 	jmethodID androidThunkJava_RegisterForPushNotifications;
 	jmethodID androidThunkJava_UnregisterForPushNotifications;
 	jmethodID androidThunkJava_SetTags;
+	jmethodID androidThunkJava_SetUserId;
+	jmethodID androidThunkJava_PostEvent;
 
 	void InitializeJavaInterface();
 	void CheckJavaObject(JNIEnv* env, void* p, const char* signature);
