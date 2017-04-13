@@ -74,6 +74,23 @@ void UPushwooshComponent::SetTags(FString json)
 	}
 }
 
+void UPushwooshComponent::SetUserId(FString userId)
+{
+	if (FPushwooshModule::IsAvailable())
+	{
+		FPushwooshModule& pushwoosh = FPushwooshModule::Get();
+		pushwoosh.SetUserId(userId);
+	}
+}
+
+void UPushwooshComponent::PostEvent(FString event, FString attributes)
+{
+	if (FPushwooshModule::IsAvailable())
+	{
+		FPushwooshModule& pushwoosh = FPushwooshModule::Get();
+		pushwoosh.PostEvent(event, attributes);
+	}
+}
 
 void UPushwooshComponent::PushRegistrationSucceeded_Handler(FString token)
 {

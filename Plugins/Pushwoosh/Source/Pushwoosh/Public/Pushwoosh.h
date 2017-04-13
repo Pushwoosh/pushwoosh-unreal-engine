@@ -92,6 +92,23 @@ public:
 	 */
 	void SetTags(FString json);
 
+	/**
+	 * Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ 	 * This allows data and events to be matched across multiple user devices.
+	 */
+	void SetUserId(FString userId);
+
+	/**
+	 * Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+	 * @param event name of the event
+	 * @param attributes JSON object with additional event parameters
+	 * 
+	 * Example:
+	 *   FPushwooshModule& pushwoosh = FPushwooshModule::Get();
+	 *	 pushwoosh.PostEvent("buttonPressed", "{ \"buttonNumber\" : \"4\", \"buttonLabel\" : \"Banner\" }");
+	 */
+	void PostEvent(FString event, FString attributes = "{}");
+
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;

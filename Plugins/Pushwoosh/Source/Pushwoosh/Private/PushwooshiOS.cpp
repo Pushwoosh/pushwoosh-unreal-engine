@@ -8,7 +8,7 @@
 
 #import "PWDelegateProxy.h"
 
-#import <Pushwoosh/PushNotificationManager.h>
+#import <Pushwoosh/Pushwoosh.h>
 #import <UserNotifications/UserNotifications.h>
 
 NSString *g_startPushData = nil;
@@ -113,6 +113,30 @@ void PushwooshiOS::SetTags(FString json)
 	}
 	
 	[[PushNotificationManager pushManager] setTags:dictionary];
+}
+
+void PushwooshiOS::SetUserId(FString userId)
+{
+	[[PWInAppManager sharedManager] setUserId:userId.GetNSString()];
+}
+
+void PushwooshiOS::PostEvent(FString event, FString attributes)
+{
+	attributes.Trim();
+	if (attributes.IsEmpty()) {
+		attributes = "{}";
+	}
+
+	NSData *data = [attributes.GetNSString() dataUsingEncoding:NSUTF8StringEncoding];
+	NSError *error = nil;
+	NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+
+	if (!dictionary) {
+		UE_LOG(LogPushwoosh, Error, TEXT("PostEvent failed, invalid json: %s, %s"), *attributes, UTF8_TO_TCHAR([[error description] UTF8String]));
+		return;
+	}
+	
+	[[PWInAppManager sharedManager] postEvent:event.GetNSString() withAttributes:dictionary];
 }
 
 #endif

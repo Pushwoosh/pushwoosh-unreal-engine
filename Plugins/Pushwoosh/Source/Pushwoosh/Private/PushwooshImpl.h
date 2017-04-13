@@ -19,6 +19,10 @@ public:
 	
 	virtual void SetTags(FString json);
 
+	virtual void SetUserId(FString userId);
+
+	virtual void PostEvent(FString event, FString attributes);
+
 	virtual ~PushwooshImpl() {};
 
 	inline bool IsInitialized() { return isInitialized; }

@@ -22,7 +22,10 @@ public:
 	virtual void SetStringTag(FString tagName, FString tagValue) override;
 	
 	virtual void SetTags(FString json) override;
-	
+
+	virtual void SetUserId(FString userId) override;
+
+	virtual void PostEvent(FString event, FString attributes) override;
 private:
 	FString applicationId;
 };

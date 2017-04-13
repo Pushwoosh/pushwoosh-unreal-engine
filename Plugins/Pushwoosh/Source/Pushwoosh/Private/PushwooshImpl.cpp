@@ -39,3 +39,13 @@ void PushwooshImpl::SetTags(FString json)
 {
 	UE_LOG(LogPushwoosh, Warning, TEXT("SetTags() is not supported on this platform"));
 }
+
+void PushwooshImpl::SetUserId(FString userId)
+{
+	UE_LOG(LogPushwoosh, Warning, TEXT("SetUserId() is not supported on this platform"));
+}
+
+void PushwooshImpl::PostEvent(FString event, FString attributes)
+{
+	UE_LOG(LogPushwoosh, Warning, TEXT("PostEvent() is not supported on this platform"));
+}

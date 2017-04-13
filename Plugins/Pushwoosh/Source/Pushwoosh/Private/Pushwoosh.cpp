@@ -86,6 +86,15 @@ void FPushwooshModule::SetTags(FString json)
 	pImpl->SetTags(json);
 }
 
+void FPushwooshModule::SetUserId(FString userId)
+{
+	pImpl->SetUserId(userId);
+}
+
+void FPushwooshModule::PostEvent(FString event, FString attributes)
+{
+	pImpl->PostEvent(event, attributes);
+}
 
 #undef LOCTEXT_NAMESPACE
 	

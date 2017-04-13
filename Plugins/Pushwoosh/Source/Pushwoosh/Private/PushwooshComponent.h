@@ -41,6 +41,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Pushwoosh")
 	void SetTags(FString json);
+
+	UFUNCTION(BlueprintCallable, Category="Pushwoosh")
+	void SetUserId(FString userId);
+
+	UFUNCTION(BlueprintCallable, Category="Pushwoosh")
+	void PostEvent(FString event, FString attributes = "");
 	
 	void InitializeComponent() override;
 
