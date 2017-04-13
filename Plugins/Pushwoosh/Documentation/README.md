@@ -57,9 +57,9 @@ void YourComponent::PushAccepted_Handler(FString data)
 [void UnregisterForPushNotifications()](#unregisterforpushnotifications)  
 [void SetIntTag(FString tagName, int tagValue)](setinttag)  
 [void SetStringTag(FString tagName, FString tagValue)](#setstringtag)  
-[void SetTags(FString json)](settags)  
-[void SetUserId(FString userId)](setuserid)  
-[void PostEvent(FString event, FString attributes)](postevent)  
+[void SetTags(FString json)](#settags)  
+[void SetUserId(FString userId)](#setuserid)  
+[void PostEvent(FString event, FString attributes)](#postevent)  
 
 ---
 
