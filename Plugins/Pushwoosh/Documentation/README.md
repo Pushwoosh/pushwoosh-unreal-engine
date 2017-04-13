@@ -58,6 +58,8 @@ void YourComponent::PushAccepted_Handler(FString data)
 [void SetIntTag(FString tagName, int tagValue)](setinttag)  
 [void SetStringTag(FString tagName, FString tagValue)](#setstringtag)  
 [void SetTags(FString json)](settags)  
+[void SetUserId(FString userId)](setuserid)  
+[void PostEvent(FString event, FString attributes)](postevent)  
 
 ---
 
@@ -164,4 +166,31 @@ Example:
 ```cpp
 FPushwooshModule& pushwoosh = FPushwooshModule::Get();
 pushwoosh.SetTags("{ \"intTag\" : 1, \"stringTag\" : \"2\", \"listTag\" : [ \"3\", \"4\", \"5\" ] }");
+```
+
+
+### SetUserId
+
+```cpp
+void SetUserId(FString userId);
+```
+
+Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+This allows data and events to be matched across multiple user devices.
+
+
+### PostEvent
+
+```cpp
+void PostEvent(FString event, FString attributes)
+```
+
+Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+@param event name of the event
+@param attributes JSON object with additional event parameters
+
+Example:
+```cpp
+FPushwooshModule& pushwoosh = FPushwooshModule::Get();
+pushwoosh.PostEvent("buttonPressed", "{ \"buttonNumber\" : \"4\", \"buttonLabel\" : \"Banner\" }");
 ```
