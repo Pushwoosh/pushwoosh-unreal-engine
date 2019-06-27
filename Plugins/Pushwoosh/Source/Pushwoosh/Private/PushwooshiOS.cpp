@@ -11,10 +11,6 @@
 #import <Pushwoosh/Pushwoosh.h>
 #import <UserNotifications/UserNotifications.h>
 
-NSString *g_startPushData = nil;
-NSObject *g_lock = [NSObject new];
-BOOL g_initialized = NO;
-
 @implementation UIApplication(PWUnreal)
 
 - (NSObject<PushNotificationDelegate> *)getPushwooshDelegate {
@@ -43,13 +39,17 @@ BOOL g_initialized = NO;
 	[[PWDelegateProxy sharedProxy] onDidFailToRegisterForRemoteNotificationsWithError:description];
 }
 
-- (void) onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart
+- (NSString *)stringFromPushDict:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    NSMutableDictionary *pushNotificationMutable = [pushNotification mutableCopy];
+    [pushNotificationMutable setObject:[NSNumber numberWithBool:onStart] forKey:@"onStart"];
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:pushNotificationMutable options:0 error:nil];
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+}
+
+- (void)onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart
 {
-	NSMutableDictionary *pushNotificationMutable = [pushNotification mutableCopy];
-	[pushNotificationMutable setObject:[NSNumber numberWithBool:onStart] forKey:@"onStart"];
-	
-	NSData *jsonData = [NSJSONSerialization dataWithJSONObject:pushNotificationMutable options:0 error:nil];
-	NSString *pushStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    NSString *pushStr = [self stringFromPushDict:pushNotification onStart:onStart];
 
 	const FString fPushPayload = FString(UTF8_TO_TCHAR([pushStr UTF8String]));
 	UE_LOG(LogPushwoosh, Log, TEXT("Push notification opened: %s"), *fPushPayload);
@@ -57,10 +57,20 @@ BOOL g_initialized = NO;
 	[[PWDelegateProxy sharedProxy] onPushAccepted:pushStr];
 }
 
+- (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    NSString *pushStr = [self stringFromPushDict:pushNotification onStart:onStart];
+
+    const FString fPushPayload = FString(UTF8_TO_TCHAR([pushStr UTF8String]));
+    UE_LOG(LogPushwoosh, Log, TEXT("Push notification received: %s"), *fPushPayload);
+    
+    [[PWDelegateProxy sharedProxy] onPushReceived:pushStr];
+}
+
 @end
 
-PushwooshiOS::PushwooshiOS(const FString& appId)
-:	applicationId(appId)
+PushwooshiOS::PushwooshiOS(const FString& appId, bool foreground)
+:	applicationId(appId),
+    showInForeground(foreground)
 {
 	
 }
@@ -76,7 +86,9 @@ void PushwooshiOS::Initialize()
 	[PushNotificationManager initializeWithAppCode:applicationId.GetNSString() appName:nil];
 	[PushNotificationManager pushManager].delegate = (NSObject<PushNotificationDelegate> *)[UIApplication sharedApplication];
 	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
-
+    
+    [PushNotificationManager pushManager].showPushnotificationAlert = showInForeground ? YES : NO;
+    
 	[[PushNotificationManager pushManager] sendAppOpen];
 }
 
@@ -88,7 +100,7 @@ void PushwooshiOS::RegisterForPushNotifications()
 
 void PushwooshiOS::UnregisterForPushNotifications() 
 {
-	[[PushNotificationManager pushManager] unregisterForPushNotifications];
+    [[PushNotificationManager pushManager] unregisterForPushNotificationsWithCompletion:nil];
 }
 
 void PushwooshiOS::SetIntTag(FString tagName, int tagValue)
@@ -122,7 +134,7 @@ void PushwooshiOS::SetUserId(FString userId)
 
 void PushwooshiOS::PostEvent(FString event, FString attributes)
 {
-	attributes.Trim();
+	attributes.TrimStartInline();
 	if (attributes.IsEmpty()) {
 		attributes = "{}";
 	}

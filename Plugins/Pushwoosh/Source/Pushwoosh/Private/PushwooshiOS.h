@@ -9,7 +9,7 @@
 class PushwooshiOS : public PushwooshImpl
 {
 public:
-	explicit PushwooshiOS(const FString& appId);
+	explicit PushwooshiOS(const FString& appId, bool foreground);
 
 	virtual void Initialize() override;
 
@@ -28,6 +28,7 @@ public:
 	virtual void PostEvent(FString event, FString attributes) override;
 private:
 	FString applicationId;
+    bool showInForeground;
 };
 
 #endif

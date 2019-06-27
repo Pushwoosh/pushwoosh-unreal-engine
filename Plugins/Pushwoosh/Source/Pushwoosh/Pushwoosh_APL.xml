@@ -6,206 +6,40 @@
 		<log text="[Pushwoosh APL] init"/>
 	</init>
 
-	<!-- optional updates applied to AndroidManifest.xml -->
-	<androidManifestUpdates>
-		<addPermission android:name="android.permission.INTERNET"/>
-		<addPermission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-		<addPermission android:name="android.permission.WAKE_LOCK"/>
-		<addPermission android:name="android.permission.VIBRATE"/>
-
-		<addPermission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-
-		<addElements tag="application">
-			<!-- PushwooshPlugin additions -->
-			<receiver android:name="com.pushwoosh.ueplugin.PushOpenReceiver" />
-			<meta-data android:name="PW_NOTIFICATION_RECEIVER" android:value="com.pushwoosh.ueplugin.PushOpenReceiver"/>
-
-			<!-- Pushwoosh SDK additions -->
-			<activity android:name="com.pushwoosh.PushHandlerActivity" />
-			<activity
-				android:name="com.pushwoosh.inapp.WebActivity"
-				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-			<service android:name="com.pushwoosh.inapp.InAppRetrieverService" />
-
-			<receiver
-				android:name="com.pushwoosh.local.BootReceiver"
-				android:enabled="true"
-				android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
-				<intent-filter>
-					<action android:name="android.intent.action.BOOT_COMPLETED" />
-
-					<category android:name="android.intent.category.DEFAULT" />
-				</intent-filter>
-			</receiver>
-
-			<service
-				android:name="com.pushwoosh.GCMListenerService"
-				android:exported="false" >
-				<intent-filter android:priority="-50">
-					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-				</intent-filter>
-			</service>
-			<service
-				android:name="com.pushwoosh.GCMInstanceIDListenerService"
-				android:exported="false" >
-				<intent-filter android:priority="-50">
-					<action android:name="com.google.android.gms.iid.InstanceID" />
-				</intent-filter>
-			</service>
-			<service
-				android:name="com.pushwoosh.GCMRegistrationService"
-				android:exported="false" >
-			</service>
-			<service android:name="com.pushwoosh.location.GeoLocationService" />
-			<activity android:name="com.pushwoosh.internal.utils.PermissionActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"  />
-
-			<receiver android:name="com.pushwoosh.local.AlarmReceiver" />
-		</addElements>
-
-		<!-- additions based on package name -->
-		<setStringFromAttribute result="packageName" tag="manifest" name="package" />
-		<log text="[Pushwoosh APL] Package name = $S(packageName)"/>
-
-		<!-- <permission android:name="${applicationId}.permission.C2D_MESSAGE" android:protectionLevel="signature"/> -->
-		<setElement result="c2d_message_permission_decl" value="permission" />
-		<addAttribute tag="$c2d_message_permission_decl" name="android:name" value="$S(packageName).permission.C2D_MESSAGE" />
-		<addAttribute tag="$c2d_message_permission_decl" name="android:protectionLevel" value="signature" />
-		<addElement tag="manifest" name="c2d_message_permission_decl" />
-
-		<!-- <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE"/> -->
-		<setElement result="c2d_message_permission" value="uses-permission" />
-		<addAttribute tag="$c2d_message_permission" name="android:name" value="$S(packageName).permission.C2D_MESSAGE" />
-		<addElement tag="manifest" name="c2d_message_permission" />
-
-		<!--
-		<receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="${applicationId}" />
-            </intent-filter>
-        </receiver>
-		-->
-		<setElement result="gcm_receiver" value="receiver" />
-		<addAttribute tag="$gcm_receiver" name="android:name" value="com.google.android.gms.gcm.GcmReceiver" />
-		<addAttribute tag="$gcm_receiver" name="android:exported" value="true" />
-		<addAttribute tag="$gcm_receiver" name="android:permission" value="com.google.android.c2dm.permission.SEND" />
-		<setElement result="gcm_receiver_filter" value="intent-filter" />
-		<addElements tag="$gcm_receiver_filter">
-			<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-		</addElements>
-		<setElement result="category_package_name" value="category" />
-		<addAttribute tag="$category_package_name" name="android:name" value="$S(packageName)" />
-		<addElement tag="$gcm_receiver_filter" name="category_package_name" />
-		<addElement tag="$gcm_receiver" name="gcm_receiver_filter" />
-		<addElement tag="application" name="gcm_receiver" />
-
-	</androidManifestUpdates> 
-
 	<!-- optional additions to proguard -->
 	<proguardAdditions>
 		<insert>
 -keep class com.pushwoosh.** { *; }
--keep class com.arellomobile.** { *; }
 -dontwarn com.pushwoosh.**
--dontwarn com.arellomobile.**
--dontwarn com.google.android.gms.gcm.**
--keep class com.google.android.gms.gcm.**
--dontwarn com.google.android.gms.iid.**
--keep class com.google.android.gms.iid.**
 		</insert>
 	</proguardAdditions>
 	
 	<!-- optional files or directories to copy to Intermediate/Android/APK -->
 	<prebuildCopies>
-		<copyDir src="$S(PluginDir)/../../lib/Android/libs" dst="$S(BuildDir)/libs" />
 		<copyDir src="$S(PluginDir)/../../lib/Android/JavaLibs" dst="$S(BuildDir)/JavaLibs" />
+        <copyFile src="$S(PluginDir)/../../../../Config/google-services.json" dst="$S(BuildDir)/gradle/app/google-services.json"/>
 	</prebuildCopies>
-
-	<resourceCopies>
-
-	</resourceCopies>
-
-	<!-- optional additions to the GameActivity imports in GameActivity.java -->
-	<gameActivityImportAdditions>
-		<insert>
-import  com.pushwoosh.ueplugin.PushwooshPlugin;
-		</insert>
-	</gameActivityImportAdditions>
-	
-	<!-- optional additions to the GameActivity class in GameActivity.java -->
-	<gameActivityClassAdditions>
-		<insert><![CDATA[
-	private PushwooshPlugin mPushwooshPlugin;
-		]]></insert>
-	</gameActivityClassAdditions>
-	
-	<!-- optional additions to GameActivity onCreate metadata reading in GameActivity.java -->
-	<gameActivityReadMetadataAdditions>
-
-	</gameActivityReadMetadataAdditions>
-	
-	<gameActivityOnCreateAdditions>
-	<!-- optional additions to GameActivity onCreate in GameActivity.java -->
-		<insert><![CDATA[
-			mPushwooshPlugin = new PushwooshPlugin(this);
-			mPushwooshPlugin.onGameActivityCreate();
-		]]></insert>
-	</gameActivityOnCreateAdditions>
-
-	<!-- optional additions to GameActivity onDestroy in GameActivity.java -->
-	<gameActivityOnDestroyAdditions>
-		<insert><![CDATA[
-			mPushwooshPlugin.onGameActivityDestroy();
-		]]></insert>
-	</gameActivityOnDestroyAdditions>
-	
-	
-	<!-- optional additions to GameActivity onStart in GameActivity.java -->
-	<gameActivityOnStartAdditions>
-		<insert>
-			
-		</insert>
-	</gameActivityOnStartAdditions>
-
-	<!-- optional additions to GameActivity onStop in GameActivity.java -->
-	<gameActivityOnStopAdditions>
-		<insert>
-
-		</insert>
-	</gameActivityOnStopAdditions>
-	
-
-	<!-- optional additions to GameActivity onPause in GameActivity.java	-->
-	<gameActivityOnPauseAdditions>
-		<insert><![CDATA[
-			mPushwooshPlugin.onGameActivityPause();
-
-		]]></insert>
-	</gameActivityOnPauseAdditions>
-
-
-	<!-- optional additions to GameActivity onResume in GameActivity.java	-->
-	<gameActivityOnResumeAdditions>
-		<insert><![CDATA[
-			mPushwooshPlugin.onGameActivityResume();
-		]]></insert>
-	</gameActivityOnResumeAdditions>
-
-
-	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
-	<gameActivityOnActivityResultAdditions>
-		<insert>
-
-		</insert>
-	</gameActivityOnActivityResultAdditions>
-	
-	<!-- optional libraries to load in GameActivity.java before libUE4.so -->
-	<soLoadLibrary>
-
-	</soLoadLibrary>
+    
+    <!-- optional additions to the GameActivity imports in GameActivity.java -->
+    <gameActivityImportAdditions>
+        <insert>
+            import  com.pushwoosh.ueplugin.PushwooshPlugin;
+        </insert>
+    </gameActivityImportAdditions>
+    
+    <!-- optional additions to the GameActivity class in GameActivity.java -->
+    <gameActivityClassAdditions>
+        <insert><![CDATA[
+            private PushwooshPlugin mPushwooshPlugin;
+        ]]></insert>
+    </gameActivityClassAdditions>
+    
+    <gameActivityOnCreateAdditions>
+        <!-- optional additions to GameActivity onCreate in GameActivity.java -->
+        <insert><![CDATA[
+            mPushwooshPlugin = new PushwooshPlugin(this);
+        ]]></insert>
+    </gameActivityOnCreateAdditions>
+    
 
 </root>

@@ -5,12 +5,12 @@ using System.IO;
 
 public class Pushwoosh : ModuleRules
 {
-	public Pushwoosh(TargetInfo Target)
+	public Pushwoosh(ReadOnlyTargetRules Target) : base(Target)
 	{
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"Pushwoosh/Public"
+				Path.Combine(ModuleDirectory, "Public")
 				// ... add public include paths required here ...
 			}
 			);
@@ -18,7 +18,7 @@ public class Pushwoosh : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"Pushwoosh/Private",
+				Path.Combine(ModuleDirectory, "Private")
 				// ... add other private include paths required here ...
 			}
 			);
@@ -59,6 +59,9 @@ public class Pushwoosh : ModuleRules
 			}
 			);
 		
+
+		PrivatePCHHeaderFile = "Private/PushwooshPrivatePCH.h";
+
 		if (Target.Platform == UnrealTargetPlatform.IOS) {
 			PublicAdditionalFrameworks.Add(
 					new UEBuildFramework(
@@ -72,8 +75,8 @@ public class Pushwoosh : ModuleRules
 		}
 		else if(Target.Platform == UnrealTargetPlatform.Android)
 		{
-			string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, BuildConfiguration.RelativeEnginePath);
-			AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", Path.Combine(PluginPath, "Pushwoosh_APL.xml")));
+			string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
+			AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "Pushwoosh_APL.xml"));
 		}
 	}
 }

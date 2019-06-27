@@ -1,5 +1,5 @@
 // Copyright 2016 Pushwoosh Inc. All Rights Reserved.
-
+#ifdef PLATFORM_IOS
 #if PLATFORM_IOS
 
 #include "PushwooshPrivatePCH.h"
@@ -9,6 +9,7 @@
 @interface PWDelegateProxy()
 
 @property (nonatomic, strong) NSString *startPushData;
+@property (nonatomic, strong) NSString *receivedStartPushData;
 @property (nonatomic, assign) BOOL listenersReady;
 @property (atomic, assign) BOOL registeringForPushes;
 
@@ -33,10 +34,14 @@
 {
 	@synchronized (self)
 	{
-		if (self.startPushData)
-		{
+		if (self.startPushData) {
 			[self dispatchPush:self.startPushData];
+            self.startPushData = nil;
 		}
+        if (self.receivedStartPushData) {
+            [self dispatchPushReceived:self.receivedStartPushData];
+            self.receivedStartPushData = nil;
+        }
 		
 		self.listenersReady = YES;
 	}
@@ -84,12 +89,34 @@
 	}
 }
 
+- (void)onPushReceived:(NSString *)data
+{
+    @synchronized (self)
+    {
+        if (!self.listenersReady)
+        {
+            self.receivedStartPushData = data;
+        }
+        else
+        {
+            [self dispatchPushReceived:data];
+        }
+    }
+}
+
 - (void)dispatchPush:(NSString*)data
 {
 	const FString fData = FString(UTF8_TO_TCHAR([data UTF8String]));
 	FPushwooshModule::PushAccepted.Broadcast(fData);
 }
 
+- (void)dispatchPushReceived:(NSString*)data
+{
+    const FString fData = FString(UTF8_TO_TCHAR([data UTF8String]));
+    FPushwooshModule::PushReceived.Broadcast(fData);
+}
+
 @end
 
+#endif
 #endif

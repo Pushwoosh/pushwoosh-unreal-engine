@@ -20,6 +20,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category=Pushwoosh, meta=(DisplayName="Pushwoosh Application Id"))
 	FString ApplicationId;
 	
-	UPROPERTY(Config, EditAnywhere, Category=Pushwoosh, meta=(DisplayName="GCM Project Number"))
-	FString GcmProjectNumber;
+	UPROPERTY(Config, EditAnywhere, Category=Pushwoosh, meta=(DisplayName="FCM Project Number"))
+	FString FcmProjectNumber;
+    
+    UPROPERTY(Config, EditAnywhere, Category=Pushwoosh, meta=(DisplayName="Show push notifications in foreground"))
+    bool ShowInForeground;
 };

@@ -10,6 +10,7 @@ class PushwooshSettings;
 DECLARE_MULTICAST_DELEGATE_OneParam(FPushwooshRegistrationSuccessDelegate, FString);
 DECLARE_MULTICAST_DELEGATE_OneParam(FPushwooshRegistrationErrorDelegate, FString);
 DECLARE_MULTICAST_DELEGATE_OneParam(FPushwooshPushAcceptedDelegate, FString);
+DECLARE_MULTICAST_DELEGATE_OneParam(FPushwooshPushReceivedDelegate, FString);
 
 class FPushwooshModule : public IModuleInterface
 {
@@ -49,6 +50,14 @@ public:
 	 */
 	static FPushwooshPushAcceptedDelegate PushAccepted;
 
+    /**
+     * Push notification recived event. Is triggered when push is received in app.
+     *
+     * Parameters:
+     *   FString json - push notification payload in JSON format.
+     */
+    static FPushwooshPushReceivedDelegate PushReceived;
+    
 	/**
 	 * Initializes plugin with specified Settings (Edit -> Project Settings... -> Plugins -> Pushwoosh).
 	 * Tells plugin that client is ready to receive PushRegistrationSucceeded, PushRegistrationError and PushAccepted Delegate events.

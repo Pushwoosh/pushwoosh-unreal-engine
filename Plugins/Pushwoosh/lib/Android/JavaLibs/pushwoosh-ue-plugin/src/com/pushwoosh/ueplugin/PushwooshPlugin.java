@@ -6,12 +6,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pushwoosh.BasePushMessageReceiver;
-import com.pushwoosh.BaseRegistrationReceiver;
-import com.pushwoosh.PushManager;
-import com.pushwoosh.inapp.InAppFacade;
-import com.pushwoosh.internal.utils.JsonUtils;
+import com.pushwoosh.Pushwoosh;
+import com.pushwoosh.exception.RegisterForPushNotificationsException;
+import com.pushwoosh.function.Result;
+import com.pushwoosh.inapp.PushwooshInApp;
 import com.pushwoosh.internal.utils.PWLog;
+import com.pushwoosh.tags.TagsBundle;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,249 +22,122 @@ public class PushwooshPlugin
 {
 	public static final String TAG = "PushwooshUEPlugin";
 	
-	private final Context mContext;
-	private final Activity mGameActivity;
-	private boolean mGameActivityAlive = false;
-	private PushManager mPushManager;
-	private AtomicBoolean mRegistering = new AtomicBoolean(false);
-	
 	private static PushwooshPlugin mInstance;
 	private static String mStartPushData;
+	private static String mStartReceivedPushData;
+	private boolean showInForeground;
 	
 	private static native void native_onPushRegistered(String token);
 	private static native void native_onPushRegistrationError(String message);
 	private static native void native_onPushAccepted(String payload);
+	private static native void native_onPushReceived(String payload);
 	
-	public static PushwooshPlugin getInstance()
-	{
+	public static PushwooshPlugin getInstance() {
 		return mInstance;
 	}
 	
-	public PushwooshPlugin(Activity activity)
-	{
+	public PushwooshPlugin(Activity activity) {
 		mInstance = this;
-		mGameActivity = activity;
-		mContext = activity.getApplicationContext();
 	}
 	
-	public boolean isGameActivityAlive()
-	{
-		return mGameActivityAlive;
-	}
-	
-	public static void handlePushOpen(String pushPayload)
-	{
-		if (PushwooshPlugin.getInstance() == null)
-		{
-			synchronized(TAG)
-			{
-				// postpone push accepted callback until application will be ready to handle it
+	public static void handlePushOpen(String pushPayload) {
+		if (PushwooshPlugin.getInstance() == null) {
+			synchronized(TAG) {
 				mStartPushData = pushPayload;
 			}
-		}
-		else
-		{
+		} else {
 			native_onPushAccepted(pushPayload);
 		}
 	}
-	
+		
+	public static void handlePushReceived(String pushPayload) {
+		if (PushwooshPlugin.getInstance() == null) {
+			synchronized(TAG) {
+				mStartReceivedPushData = pushPayload;
+			}
+		} else {
+			native_onPushReceived(pushPayload);
+		}
+	}
+
+	public boolean isShowPushInForeground() {
+		return showInForeground;
+	}
 	/// External plugin methods
 	
-	public void initialize(String appId, String gcmProject)
-	{
-		PWLog.debug(TAG, "initialize(" + appId + ", " + gcmProject + ") method called ");
-		
-		try 
-		{
-			PushManager.initializePushManager(mContext, appId, gcmProject);
-			mPushManager = PushManager.getInstance(mContext);
-			mPushManager.onStartup(mContext);
-			
-			synchronized(TAG)
-			{
-				if (mStartPushData != null)
-				{
+	public void initialize(String appId, String fcmProject, boolean showInForeground) {
+		PWLog.debug(TAG, "initialize(" + appId + ", " + fcmProject + ") method called ");
+		try {
+			Pushwoosh.getInstance().setAppId(appId);
+			Pushwoosh.getInstance().setSenderId(fcmProject);
+			this.showInForeground = showInForeground;
+
+			synchronized(TAG) {
+				if (mStartReceivedPushData != null) {
+					native_onPushReceived(mStartPushData);
+					mStartReceivedPushData = null;
+				}
+				if (mStartPushData != null) {
 					native_onPushAccepted(mStartPushData);
 					mStartPushData = null;
 				}
 			}
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			PWLog.exception(e);
 		}
 	}
 	
-	public void registerForPushNotifications()
-	{
-		mRegistering.set(true);
-		
-		PWLog.debug(TAG, "registerForPushNotifications() method called ");
-		
-		mPushManager.registerForPushNotifications();
+	public void registerForPushNotifications() {
+		Pushwoosh.getInstance().registerForPushNotifications(new com.pushwoosh.function.Callback<String, RegisterForPushNotificationsException>() {
+			@Override
+			public void process(Result<String, RegisterForPushNotificationsException> result) {
+				if (result.isSuccess()) {
+					native_onPushRegistered(result.getData());
+				} else if (result.getException() != null) {
+					native_onPushRegistrationError(result.getException().getLocalizedMessage());
+				}
+			}
+		});
 	}
 	
-	public void unregisterForPushNotifications()
-	{
+	public void unregisterForPushNotifications() {
 		PWLog.debug(TAG, "unregisterForPushNotifications() method called ");
 		
-		mPushManager.unregisterForPushNotifications();
+		Pushwoosh.getInstance().unregisterForPushNotifications();
 	}
 	
-	public void setTags(String tagsStr)
-	{
+	public void setTags(String tagsStr) {
 		PWLog.debug(TAG, "setTags(\"" + tagsStr +  "\") method called ");
-		
-		try
-		{
+		try {
 			JSONObject json = new JSONObject(tagsStr);
-			Map<String, Object> tags = JsonUtils.jsonToMap(json);
 			
-			PushManager.sendTags(mContext, tags, null);
+			Pushwoosh.getInstance().sendTags(new TagsBundle.Builder().putAll(json).build());
 		}
-		catch(JSONException e)
-		{
+		catch(JSONException e) {
 			PWLog.exception(e);
 		}
 	}
 	
-	public void setUserId(String userId)
-	{
+	public void setUserId(String userId) {
 		PWLog.debug(TAG, "setUserId(\"" + userId +  "\") method called ");
 		
-		PushManager.getInstance(mContext).setUserId(mContext, userId);
+		PushwooshInApp.getInstance().setUserId(userId);
 	}
 	
-	public void postEvent(String event, String attributes)
-	{
+	public void postEvent(String event, String attributes) {
 		PWLog.debug(TAG, "postEvent(\"" + event +  "\", " + attributes + ") method called ");
 		
 		attributes = attributes.trim();
-		if (attributes.isEmpty()) 
-		{
+		if (attributes.isEmpty()) {
 			attributes = "{}";
 		}
 		
-		try
-		{
-			Map<String, Object> attributesMap = JsonUtils.jsonToMap(new JSONObject(attributes));
-			InAppFacade.postEvent(mGameActivity, event, attributesMap);
+		try {
+			PushwooshInApp.getInstance().postEvent(event, new TagsBundle.Builder().putAll(new JSONObject(attributes)).build());
 		}
-		catch (JSONException e)
-		{
+		catch (JSONException e) {
 			PWLog.exception(e);
 		}
 	}
-	
-	/// Activity lifecycle callbacks
-	
-	public void onGameActivityCreate()
-	{
-		PWLog.debug(TAG, "GameActivity created");
-		
-		mRegistrationReceiver.register(mContext);
-		mPushReceiver.register(mContext);
-		
-		mGameActivityAlive = true;
-	}
-	
-	public void onGameActivityDestroy()
-	{
-		PWLog.debug(TAG, "GameActivity destroyed");
-		
-		mRegistrationReceiver.unregister(mContext);
-		
-		mGameActivityAlive = false;
-	}
-	
-	public void onGameActivityPause()
-	{
-		PWLog.debug(TAG, "GameActivity paused");
-		
-		mPushReceiver.unregister(mContext);
-	}
-	
-	public void onGameActivityResume()
-	{
-		PWLog.debug(TAG, "GameActivity resumed");
-		
-		mPushReceiver.register(mContext);
-	}
-	
-	/// Private 
-	
-	private static class PushMessageReceiver extends BasePushMessageReceiver
-	{
-		@Override
-		protected void onMessageReceive(Intent intent)
-		{
-			PWLog.debug(TAG, "Push notification opened in foreground");
-			
-			native_onPushAccepted(intent.getStringExtra(JSON_DATA_KEY));
-		}
-		
-		public void register(Context context)
-		{
-			unregister(context);
-			
-			IntentFilter intentFilter = new IntentFilter(context.getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
-			context.registerReceiver(this, intentFilter);
-		}
-		
-		public void unregister(Context context)
-		{
-			try
-			{
-				context.unregisterReceiver(this);
-			}
-			catch (Exception e)
-			{
-				// pass.
-			}
-		}
-	}
-	
-	private PushMessageReceiver mPushReceiver = new PushMessageReceiver();
-	
-	
-	private class RegistrationReceiver extends BaseRegistrationReceiver
-	{
-		@Override
-		public void onRegisterActionReceive(Context context, Intent intent)
-		{
-			if (null != intent && mRegistering.getAndSet(false))
-			{
-				if (intent.hasExtra(PushManager.REGISTER_EVENT))
-				{
-					native_onPushRegistered(intent.getExtras().getString(PushManager.REGISTER_EVENT));
-				}
-				else if (intent.hasExtra(PushManager.REGISTER_ERROR_EVENT))
-				{
-					native_onPushRegistrationError(intent.getExtras().getString(PushManager.REGISTER_ERROR_EVENT));
-				}
-			}
-		}
-		
-		public void register(Context context)
-		{
-			unregister(context);
-			
-			IntentFilter intentFilter = new IntentFilter(context.getPackageName() + "." + PushManager.REGISTER_BROAD_CAST_ACTION);
-			context.registerReceiver(this, intentFilter);	
-		}
-		
-		public void unregister(Context context)
-		{
-			try
-			{
-				context.unregisterReceiver(this);
-			}
-			catch (Exception e)
-			{
-				// pass.
-			}
-		}
-	}
-	
-	private RegistrationReceiver mRegistrationReceiver = new RegistrationReceiver();
 }

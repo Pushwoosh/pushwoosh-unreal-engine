@@ -7,7 +7,8 @@
 UPushwooshSettings::UPushwooshSettings(const FObjectInitializer& ObjectInitializer)
 :	Super(ObjectInitializer),
 	ApplicationId(""),
-	GcmProjectNumber("")
+	FcmProjectNumber(""),
+    ShowInForeground(true)
 {
 	
 }

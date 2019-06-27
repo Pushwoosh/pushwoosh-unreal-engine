@@ -11,7 +11,7 @@
 class PushwooshAndroid : public PushwooshImpl
 {
 public:
-	PushwooshAndroid(const FString& appId, const FString& gcmPN);
+	PushwooshAndroid(const FString& appId, const FString& fcmPN, bool foreground);
 	~PushwooshAndroid();
 
 	virtual void Initialize() override;
@@ -31,7 +31,8 @@ public:
 	virtual void PostEvent(FString event, FString attributes) override;
 private:
 	FString applicationId;
-	FString gcmProjectNumber;
+	FString fcmProjectNumber;
+    bool showInForeground;
 
 	jobject pluginObject;
 

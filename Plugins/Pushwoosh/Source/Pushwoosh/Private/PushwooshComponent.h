@@ -8,6 +8,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPushwooshRegistrationSuccessDynamicDelegate, FString, PushToken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPushwooshRegistrationErrorDynamicDelegate, FString, Error);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPushwooshPushAcceptedDynamicDelegate, FString, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPushwooshPushReceivedDynamicDelegate, FString, Data);
 
 UCLASS( ClassGroup=(Pushwoosh), meta=(BlueprintSpawnableComponent) )
 class UPushwooshComponent : public UActorComponent
@@ -26,6 +27,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Pushwoosh")
 	FPushwooshPushAcceptedDynamicDelegate PushAccepted;
 
+    UPROPERTY(BlueprintAssignable, Category = "Pushwoosh")
+    FPushwooshPushReceivedDynamicDelegate PushReceived;
 
 	UFUNCTION(BlueprintCallable, Category="Pushwoosh")
 	void RegisterForPushNotifications();
@@ -54,4 +57,5 @@ private:
 	void PushRegistrationSucceeded_Handler(FString token);
 	void PushRegistrationError_Handler(FString error);
 	void PushAccepted_Handler(FString data);
+    void PushReceived_Handler(FString data);
 };

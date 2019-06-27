@@ -18,6 +18,7 @@ void UPushwooshComponent::InitializeComponent()
 		FPushwooshModule::PushRegistrationSucceeded.AddUObject(this, &UPushwooshComponent::PushRegistrationSucceeded_Handler);
 		FPushwooshModule::PushRegistrationError.AddUObject(this, &UPushwooshComponent::PushRegistrationError_Handler);
 		FPushwooshModule::PushAccepted.AddUObject(this, &UPushwooshComponent::PushAccepted_Handler);
+        FPushwooshModule::PushReceived.AddUObject(this, &UPushwooshComponent::PushReceived_Handler);
 		
 		FPushwooshModule& pushwoosh = FPushwooshModule::Get();
 		pushwoosh.Initialize();
@@ -105,4 +106,9 @@ void UPushwooshComponent::PushRegistrationError_Handler(FString error)
 void UPushwooshComponent::PushAccepted_Handler(FString data)
 {
 	PushAccepted.Broadcast(data);
+}
+
+void UPushwooshComponent::PushReceived_Handler(FString data)
+{
+    PushReceived.Broadcast(data);
 }

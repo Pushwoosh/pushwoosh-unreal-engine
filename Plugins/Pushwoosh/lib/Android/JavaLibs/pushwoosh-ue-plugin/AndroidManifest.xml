@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pushwoosh.ueplugin" >
-
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="23" />
-
     <application>
-
+        <meta-data
+        android:name="com.pushwoosh.notification_service_extension"
+        android:value="com.pushwoosh.ueplugin.PushwooshNotificationServiceExtension" />
+        
+        <meta-data
+        android:name="com.pushwoosh.internal.plugin_provider"
+        android:value="com.pushwoosh.ueplugin.UEPluginProvider" />
+        <meta-data
+        android:name="com.pushwoosh.log_level"
+        android:value="NOISE" />
     </application>
-
 </manifest>

@@ -46,12 +46,25 @@ JNIEXPORT void JNICALL pw_JavaCallback_onPushAccepted(JNIEnv* env, jclass clazz,
 
 	FPushwooshModule::PushAccepted.Broadcast(fPayloadStr);
 }
+    
+JNIEXPORT void JNICALL pw_JavaCallback_onPushReceived(JNIEnv* env, jclass clazz, jstring payload)
+{
+    const char *nativeString = env->GetStringUTFChars(payload, 0);
+    FString fPayloadStr = nativeString;
+    
+    UE_LOG(LogPushwoosh, Log, TEXT("Push received: %s"), *fPayloadStr);
+    
+    env->ReleaseStringUTFChars(payload, nativeString);
+    
+    FPushwooshModule::PushReceived.Broadcast(fPayloadStr);
+}
 
 }
 
-PushwooshAndroid::PushwooshAndroid(const FString& appId, const FString& gcmPN)
+PushwooshAndroid::PushwooshAndroid(const FString& appId, const FString& fcmPN, bool foreground)
 :	applicationId(appId),
-	gcmProjectNumber(gcmPN)
+	fcmProjectNumber(fcmPN),
+    showInForeground(foreground)
 {
 	InitializeJavaInterface();
 }
@@ -73,10 +86,11 @@ void PushwooshAndroid::Initialize()
 
 	if (JNIEnv* env = FAndroidApplication::GetJavaEnv())
 	{
-		jstring jStrAppId = env->NewStringUTF(TCHAR_TO_ANSI(*applicationId));
-		jstring jStrGcmProject = env->NewStringUTF(TCHAR_TO_ANSI(*gcmProjectNumber));
+		jstring jStrAppId = env->NewStringUTF(TCHAR_TO_UTF8(*applicationId));
+		jstring jStrGcmProject = env->NewStringUTF(TCHAR_TO_UTF8(*fcmProjectNumber));
+        jboolean jBoolShowInForeground = showInForeground ? JNI_TRUE : JNI_FALSE;
 
-		env->CallVoidMethod(pluginObject, androidThunkJava_Initialize, jStrAppId, jStrGcmProject);
+		env->CallVoidMethod(pluginObject, androidThunkJava_Initialize, jStrAppId, jStrGcmProject, jBoolShowInForeground);
 	}
 }
 
@@ -146,7 +160,7 @@ void PushwooshAndroid::InitializeJavaInterface()
 		CheckJavaObject(env, pluginClass, "com/pushwoosh/ueplugin/PushwooshPlugin");
 
 		jmethodID androidThunkJava_getInstance = FJavaWrapper::FindStaticMethod(env, pluginClass, "getInstance", "()Lcom/pushwoosh/ueplugin/PushwooshPlugin;", false);
-		androidThunkJava_Initialize = FJavaWrapper::FindMethod(env, pluginClass, "initialize", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+        androidThunkJava_Initialize = FJavaWrapper::FindMethod(env, pluginClass, "initialize", "(Ljava/lang/String;Ljava/lang/String;Z)V", false);
 		androidThunkJava_RegisterForPushNotifications = FJavaWrapper::FindMethod(env, pluginClass, "registerForPushNotifications", "()V", false);
 		androidThunkJava_UnregisterForPushNotifications = FJavaWrapper::FindMethod(env, pluginClass, "unregisterForPushNotifications", "()V", false);
 		androidThunkJava_SetTags = FJavaWrapper::FindMethod(env, pluginClass, "setTags", "(Ljava/lang/String;)V", false);
@@ -162,7 +176,8 @@ void PushwooshAndroid::InitializeJavaInterface()
 		static const JNINativeMethod jnm[] = {
 			{"native_onPushRegistered", "(Ljava/lang/String;)V", (void *)&pw_JavaCallback_onPushRegistered},
 			{"native_onPushRegistrationError", "(Ljava/lang/String;)V", (void *)&pw_JavaCallback_onPushRegistrationError},
-			{"native_onPushAccepted", "(Ljava/lang/String;)V", (void *)&pw_JavaCallback_onPushAccepted }
+			{"native_onPushAccepted", "(Ljava/lang/String;)V", (void *)&pw_JavaCallback_onPushAccepted },
+            {"native_onPushReceived", "(Ljava/lang/String;)V", (void *)&pw_JavaCallback_onPushReceived }
 		};
 
 		env->RegisterNatives(pluginClass, jnm, sizeof(jnm) / sizeof(jnm[0]));

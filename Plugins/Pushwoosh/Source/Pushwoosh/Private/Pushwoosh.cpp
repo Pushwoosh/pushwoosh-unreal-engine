@@ -18,6 +18,7 @@ FPushwooshRegistrationSuccessDelegate FPushwooshModule::PushRegistrationSucceede
 FPushwooshRegistrationErrorDelegate FPushwooshModule::PushRegistrationError;
 
 FPushwooshPushAcceptedDelegate FPushwooshModule::PushAccepted;
+FPushwooshPushReceivedDelegate FPushwooshModule::PushReceived;
 
 void FPushwooshModule::StartupModule()
 {
@@ -35,9 +36,9 @@ void FPushwooshModule::StartupModule()
 	const UPushwooshSettings* pushwooshSettings = GetDefault<UPushwooshSettings>();
 
 	#if PLATFORM_IOS
-		pImpl = new PushwooshiOS(pushwooshSettings->ApplicationId);
+		pImpl = new PushwooshiOS(pushwooshSettings->ApplicationId, pushwooshSettings->ShowInForeground);
 	#elif PLATFORM_ANDROID
-		pImpl = new PushwooshAndroid(pushwooshSettings->ApplicationId, pushwooshSettings->GcmProjectNumber);
+		pImpl = new PushwooshAndroid(pushwooshSettings->ApplicationId, pushwooshSettings->FcmProjectNumber, pushwooshSettings->ShowInForeground);
 	#else
 		pImpl = new PushwooshImpl();
 	#endif

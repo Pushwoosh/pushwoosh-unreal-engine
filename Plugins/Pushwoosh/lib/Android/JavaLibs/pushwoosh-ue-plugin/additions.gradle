@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+
+    dependencies {
+        classpath 'com.google.gms:google-services:4.2.0'
+    }
+}
+
+
+ext {
+    pushwoosh = "5.16.0"
+}
+
+evaluationDependsOn(':app')
+
+rootProject.subprojects {
+    if (name == "app") {
+        if (!plugins.hasPlugin('com.google.gms.google-services')) {
+            apply {
+                plugin com.google.gms.googleservices.GoogleServicesPlugin
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
+    implementation "com.google.firebase:firebase-core:11.8.0"
+    implementation "com.google.firebase:firebase-messaging:11.8.0"
+}

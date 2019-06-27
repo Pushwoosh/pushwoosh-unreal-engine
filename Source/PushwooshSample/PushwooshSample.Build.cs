@@ -4,8 +4,10 @@ using UnrealBuildTool;
 
 public class PushwooshSample : ModuleRules
 {
-	public PushwooshSample(TargetInfo Target)
+	public PushwooshSample(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PrivatePCHHeaderFile = "PushwooshSample.h";
+		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Pushwoosh" });

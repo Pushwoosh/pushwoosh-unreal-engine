@@ -16,6 +16,8 @@
 
 - (void)onPushAccepted:(NSString *)data;
 
+- (void)onPushReceived:(NSString *)data;
+
 @end
 
 #endif
