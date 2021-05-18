@@ -9,6 +9,8 @@
 #import "PWDelegateProxy.h"
 
 #import <Pushwoosh/Pushwoosh.h>
+#import <Pushwoosh/PushNotificationManager.h>
+#import <Pushwoosh/PWInAppManager.h>
 #import <UserNotifications/UserNotifications.h>
 
 @implementation UIApplication(PWUnreal)
